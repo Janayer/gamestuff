@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GameStuff</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #111827;
+    color: white;
+}
+
+header {
+    height: 60px;
+    background: #1f2937;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 15px;
+}
+
+h1 {
+    margin: 0;
+    font-size: 20px;
+}
+
+button {
+    background: #7c3aed;
+    color: white;
+    border: 0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin: 3px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #8b5cf6;
+}
+
+#game {
+    position: relative;
+    height: calc(100vh - 60px);
+    overflow: hidden;
+    background: #87ceeb;
+}
+
+#world {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(#87ceeb 0 65%, #65a30d 65% 100%);
+}
+
+.object {
+    position: absolute;
+    cursor: grab;
+}
+
+.cube {
+    width: 60px;
+    height: 60px;
+    background: #8b5cf6;
+    border: 3px solid #4c1d95;
+}
+
+.tree {
+    width: 35px;
+    height: 80px;
+}
+
+.tree::before {
+    content: "";
+    position: absolute;
+    width: 25px;
+    height: 55px;
+    background: #16a34a;
+    border-radius: 50%;
+    left: 5px;
+    top: 0;
+}
+
+.tree::after {
+    content: "";
+    position: absolute;
+    width: 12px;
+    height: 35px;
+    background: #92400e;
+    left: 12px;
+    top: 45px;
+}
+
+#player {
+    position: absolute;
+    width: 35px;
+    height: 45px;
+    background: #ef4444;
+    border-radius: 8px;
+    left: 100px;
+    top: 300px;
+    border: 3px solid #991b1b;
+}
+
+#menu {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: #111827dd;
+    padding: 10px;
+    border-radius: 10px;
+    z-index: 10;
+}
+
+#info {
+    position: absolute;
+    bottom: 15px;
+    left: 15px;
+    background: #111827dd;
+    padding: 10px;
+    border-radius: 8px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🎮 GameStuff</h1>
+
+    <div>
+        <button onclick="addCube()">🧱 Würfel</button>
+        <button onclick="addTree()">🌳 Baum</button>
+        <button onclick="saveWorld()">💾 Speichern</button>
+        <button onclick="clearWorld()">🗑️ Löschen</button>
+    </div>
+</header>
+
+<div id="game">
+
+    <div id="world">
+
+        <div id="player"></div>
+
+    </div>
+
+    <div id="info">
+        🎮 Pfeiltasten = Spieler bewegen
+    </div>
+
+</div>
+
+<script>
+
+const world = document.getElementById("world");
+const player = document.getElementById("player");
+
+let playerX = 100;
+let playerY = 300;
+
+
+/* Spieler bewegen */
+
+document.addEventListener("keydown", function(event) {
+
+    const speed = 10;
+
+    if (event.key === "ArrowLeft") {
+        playerX -= speed;
+    }
+
+    if (event.key === "ArrowRight") {
+        playerX += speed;
+    }
+
+    if (event.key === "ArrowUp") {
+        playerY -= speed;
+    }
+
+    if (event.key === "ArrowDown") {
+        playerY += speed;
+    }
+
+    playerX = Math.max(0, Math.min(window.innerWidth - 40, playerX));
+    playerY = Math.max(70, Math.min(window.innerHeight - 100, playerY));
+
+    player.style.left = playerX + "px";
+    player.style.top = playerY + "px";
+
+});
+
+
+/* Würfel erstellen */
+
+function addCube() {
+
+    const cube = document.createElement("div");
+
+    cube.className = "object cube";
+
+    cube.style.left =
+        Math.random() * (window.innerWidth - 100) + "px";
+
+    cube.style.top =
+        Math.random() * (window.innerHeight - 180) + 80 + "px";
+
+    world.appendChild(cube);
+
+    makeDraggable(cube);
+}
+
+
+/* Baum erstellen */
+
+function addTree() {
+
+    const tree = document.createElement("div");
+
+    tree.className = "object tree";
+
+    tree.style.left =
+        Math.random() * (window.innerWidth - 80) + "px";
+
+    tree.style.top =
+        Math.random() * (window.innerHeight - 180) + 80 + "px";
+
+    world.appendChild(tree);
+
+    makeDraggable(tree);
+}
+
+
+/* Objekte mit Maus verschieben */
+
+function makeDraggable(element) {
+
+    let dragging = false;
+
+    element.addEventListener("mousedown", function() {
+        dragging = true;
+    });
+
+    document.addEventListener("mousemove", function(event) {
+
+        if (!dragging) return;
+
+        element.style.left = event.clientX - 20 + "px";
+        element.style.top = event.clientY - 20 + "px";
+
+    });
+
+    document.addEventListener("mouseup", function() {
+        dragging = false;
+    });
+}
+
+
+/* Welt speichern */
+
+function saveWorld() {
+
+    localStorage.setItem(
+        "gamestuff_world",
+        world.innerHTML
+    );
+
+    alert("💾 Welt gespeichert!");
+
+}
+
+
+/* Welt löschen */
+
+function clearWorld() {
+
+    if (!confirm("Wirklich alle Objekte löschen?")) {
+        return;
+    }
+
+    world.innerHTML = "";
+
+    world.appendChild(player);
+
+}
+
+
+/* Gespeicherte Welt laden */
+
+window.addEventListener("load", function() {
+
+    const saved =
+        localStorage.getItem("gamestuff_world");
+
+    if (saved) {
+
+        world.innerHTML = saved;
+
+        const objects =
+            world.querySelectorAll(".object");
+
+        objects.forEach(makeDraggable);
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>
