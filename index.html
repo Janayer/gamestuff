@@ -493,6 +493,22 @@ gameLoop();
 
 function addBox() {
 
+    const box = document.createElement("div");
+
+    box.className = "box";
+
+    box.style.left =
+        Math.random() * (window.innerWidth - 100) + "px";
+
+    box.style.top = "200px";
+
+    box.dataset.velocityY = "0";
+
+    document.getElementById("game").appendChild(box);
+
+    makeDraggable(box);
+} {
+
 
     const box =
         document.createElement("div");
