@@ -299,43 +299,144 @@ function isOnGround() {
 }
 
 
-/* =========================
-   SPIEL LOOP
-========================= */
-
-
 function gameLoop() {
-
 
     /* Bewegung */
 
-    if (
-        keys["ArrowLeft"] ||
-        keys["a"]
-    ) {
-
+    if (keys["ArrowLeft"] || keys["a"]) {
         velocityX = -speed;
-
     }
 
-    else if (
-        keys["ArrowRight"] ||
-        keys["d"]
-    ) {
-
+    else if (keys["ArrowRight"] || keys["d"]) {
         velocityX = speed;
-
     }
 
     else {
-
         velocityX = 0;
+    }
+
+
+    /* Neue Position berechnen */
+
+    let nextX = playerX + velocityX;
+    let nextY = playerY + velocityY;
+
+
+    /* Schwerkraft */
+
+    velocityY += gravity;
+
+
+    /* Kisten finden */
+
+    const boxes = document.querySelectorAll(".box");
+
+
+    /* Kollision mit Kisten */
+
+    boxes.forEach(function(box) {
+
+        const boxX = parseFloat(box.style.left);
+        const boxY = parseFloat(box.style.top);
+
+        const boxWidth = 60;
+        const boxHeight = 60;
+
+        const playerWidth = 35;
+        const playerHeight = 50;
+
+
+        const collision =
+            nextX < boxX + boxWidth &&
+            nextX + playerWidth > boxX &&
+            nextY < boxY + boxHeight &&
+            nextY + playerHeight > boxY;
+
+
+        if (collision) {
+
+            /* Von oben auf die Kiste */
+
+            if (
+                playerY + playerHeight <= boxY &&
+                velocityY >= 0
+            ) {
+
+                nextY = boxY - playerHeight;
+
+                velocityY = 0;
+
+            }
+
+
+            /* Von unten gegen die Kiste */
+
+            else if (
+                playerY >= boxY + boxHeight &&
+                velocityY < 0
+            ) {
+
+                nextY = boxY + boxHeight;
+
+                velocityY = 0;
+
+            }
+
+
+            /* Von der Seite */
+
+            else {
+
+                nextX = playerX;
+
+            }
+
+        }
+
+    });
+
+
+    /* Position übernehmen */
+
+    playerX = nextX;
+    playerY = nextY;
+
+
+    /* Boden */
+
+    if (playerY >= groundY()) {
+
+        playerY = groundY();
+
+        velocityY = 0;
 
     }
 
 
-    playerX += velocityX;
+    /* Bildschirmrand */
 
+    playerX =
+        Math.max(
+            0,
+            Math.min(
+                window.innerWidth - 40,
+                playerX
+            )
+        );
+
+
+    /* Spieler anzeigen */
+
+    player.style.left =
+        playerX + "px";
+
+    player.style.top =
+        playerY + "px";
+
+
+    requestAnimationFrame(gameLoop);
+
+}
 
     /* Schwerkraft */
 
